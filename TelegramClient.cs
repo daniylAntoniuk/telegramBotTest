@@ -25,7 +25,23 @@ namespace TelegramBot
             botClient.OnUpdate += BotClient_OnUpdate;
             botClient.OnMessage += BotClient_OnMessage;
             botClient.StartReceiving();
+            botClient.OnCallbackQuery += BotClient_OnCallbackQuery;
+        }
 
+        private async void BotClient_OnCallbackQuery(object sender, Telegram.Bot.Args.CallbackQueryEventArgs e)
+        {
+            if(e.CallbackQuery.Data == "quiz")
+            {
+                List<string> answers = new List<string>();
+                answers.Add("Nice");
+                answers.Add("Bad");
+                var id = await botClient.SendPollAsync(chatId: e.CallbackQuery.Message.Chat, question: "How are you ?", answers, isAnonymous: false);
+                Polls.Add(new Poll
+                {
+                    ChatId = e.CallbackQuery.Message.Chat,
+                    PollId = id.Poll.Id
+                });
+            }
         }
 
         private async void BotClient_OnUpdate(object sender, Telegram.Bot.Args.UpdateEventArgs e)
@@ -55,22 +71,24 @@ namespace TelegramBot
         }
         private async void BotClient_OnMessage(object sender, Telegram.Bot.Args.MessageEventArgs e)
         {
-            Console.WriteLine(e.Message.Poll != null ? e.Message.Poll.TotalVoterCount : "");
             if (e.Message.Text != null)
             {
                 switch (e.Message.Text.ToLower())
                 {
                     case "hello":
                         {
-                            List<string> answers = new List<string>();
-                            answers.Add("Nice");
-                            answers.Add("Bad");
-                            var id = await botClient.SendPollAsync(chatId: e.Message.Chat, question: "How are you ?", answers, isAnonymous: false);
-                            Polls.Add(new Poll
-                            {
-                                ChatId = e.Message.Chat,
-                                PollId = id.Poll.Id
-                            });
+                            var keyboard = new InlineKeyboardMarkup(
+                                new InlineKeyboardButton
+                                {
+                                    Text = "Quiz",
+                                    CallbackData = "quiz"
+                                });
+
+                            await botClient.SendTextMessageAsync(
+                                chatId: e.Message.Chat,
+                                text: "Hello",
+                                replyMarkup: keyboard);
+
                             break;
                         }
                     case "📊 start quiz":
