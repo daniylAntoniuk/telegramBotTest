@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot
 {
@@ -24,6 +25,7 @@ namespace TelegramBot
             botClient.OnUpdate += BotClient_OnUpdate;
             botClient.OnMessage += BotClient_OnMessage;
             botClient.StartReceiving();
+
         }
 
         private async void BotClient_OnUpdate(object sender, Telegram.Bot.Args.UpdateEventArgs e)
@@ -32,7 +34,7 @@ namespace TelegramBot
             {
                 //await botClient.SendTextMessageAsync(chatId: Polls.FirstOrDefault(x=>x.PollId == e.Update.PollAnswer.PollId).ChatId, text:e.Update.PollAnswer.OptionIds);
                 var chatId = Polls.FirstOrDefault(x => x.PollId == e.Update.PollAnswer.PollId);
-                if (e.Update.PollAnswer.OptionIds.Length != 0 && chatId !=null)
+                if (e.Update.PollAnswer.OptionIds.Length != 0 && chatId != null)
                 {
                     if (e.Update.PollAnswer.OptionIds[0] == 0)
                     {
@@ -54,24 +56,62 @@ namespace TelegramBot
         private async void BotClient_OnMessage(object sender, Telegram.Bot.Args.MessageEventArgs e)
         {
             Console.WriteLine(e.Message.Poll != null ? e.Message.Poll.TotalVoterCount : "");
-
             if (e.Message.Text != null)
             {
-                if (e.Message.Text.ToLower() == "hello")
+                switch (e.Message.Text.ToLower())
                 {
-                    List<string> answers = new List<string>();
-                    answers.Add("Nice");
-                    answers.Add("Bad");
-                    var id = await botClient.SendPollAsync(chatId: e.Message.Chat, question: "How are you ?", answers, isAnonymous: false);
-                    Polls.Add(new Poll
-                    {
-                        ChatId = e.Message.Chat,
-                        PollId = id.Poll.Id
-                    });
-                    //await botClient.SendStickerAsync(
-                    //    chatId: e.Message.Chat,
-                    //    sticker: "https://fs13.fex.net:443/download/2521380597"
-                    //    );
+                    case "hello":
+                        {
+                            List<string> answers = new List<string>();
+                            answers.Add("Nice");
+                            answers.Add("Bad");
+                            var id = await botClient.SendPollAsync(chatId: e.Message.Chat, question: "How are you ?", answers, isAnonymous: false);
+                            Polls.Add(new Poll
+                            {
+                                ChatId = e.Message.Chat,
+                                PollId = id.Poll.Id
+                            });
+                            break;
+                        }
+                    case "📊 start quiz":
+                        {
+                            List<string> answers = new List<string>();
+                            answers.Add("Nice");
+                            answers.Add("Bad");
+                            var id = await botClient.SendPollAsync(chatId: e.Message.Chat, question: "How are you ?", answers, isAnonymous: false);
+                            Polls.Add(new Poll
+                            {
+                                ChatId = e.Message.Chat,
+                                PollId = id.Poll.Id
+                            });
+                            break;
+                        }
+                    case "/start":
+                        {
+                            var keyboard = new ReplyKeyboardMarkup
+                            {
+                                Keyboard = new KeyboardButton[][]
+                                {
+                                    new KeyboardButton[]
+                                    {
+                                        new KeyboardButton("📊 Start quiz"),
+                                        new KeyboardButton("📊 Start quiz"),
+                                        new KeyboardButton("📊 Start quiz")
+                                    },
+                                    new KeyboardButton[]
+                                    {
+                                        new KeyboardButton("📊 Start quiz"),
+                                        new KeyboardButton("📊 Start quiz")
+                                    }
+                                }
+                            };
+                            await botClient.SendStickerAsync(
+                                chatId: e.Message.Chat,
+                                sticker: "https://fs13.fex.net:443/download/2521380597",
+                                replyMarkup: keyboard
+                                );
+                            break;
+                        }
                 }
             }
         }
