@@ -17,6 +17,8 @@ namespace TelegramBot
     {
         static ITelegramBotClient botClient;
         List<Poll> Polls = new List<Poll>();
+
+        #region StartClient
         public void StartClient()
         {
             botClient = new TelegramBotClient("1452921547:AAE31ilXZ7sykFkOHlCC84FDITD6RDaNib0");
@@ -27,7 +29,9 @@ namespace TelegramBot
             botClient.StartReceiving();
             botClient.OnCallbackQuery += BotClient_OnCallbackQuery;
         }
+        #endregion
 
+        #region Keybord button clicked
         private async void BotClient_OnCallbackQuery(object sender, Telegram.Bot.Args.CallbackQueryEventArgs e)
         {
             if(e.CallbackQuery.Data == "quiz")
@@ -43,7 +47,9 @@ namespace TelegramBot
                 });
             }
         }
+        #endregion
 
+        #region Updated
         private async void BotClient_OnUpdate(object sender, Telegram.Bot.Args.UpdateEventArgs e)
         {
             if (e.Update.PollAnswer != null)
@@ -69,6 +75,9 @@ namespace TelegramBot
                 }
             }
         }
+        #endregion
+
+        #region Message received
         private async void BotClient_OnMessage(object sender, Telegram.Bot.Args.MessageEventArgs e)
         {
             if (e.Message.Text != null)
@@ -133,5 +142,6 @@ namespace TelegramBot
                 }
             }
         }
+        #endregion
     }
 }
